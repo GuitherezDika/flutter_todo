@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/screens/login_screen.dart';
 import 'package:todo_app/screens/register_screen.dart';
 
 void main() {
@@ -10,7 +11,7 @@ void main() {
     initialRoute: '/register',
     routes: {
       '/register': (context) => const RegisterScreen(),
-      // '/login': (context) => const LoginScreen()
+      '/login': (context) => const LoginScreen()
     }
 
     // runApp = run applikasi

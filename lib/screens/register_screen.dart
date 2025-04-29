@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -63,8 +64,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() {
       _isLoading = true;
     });
-
-    final url = Uri.parse('http://127.0.0.1:3000/auth/register');
+  
+    final url = Uri.parse('http://192.168.0.114:3000/auth/register');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

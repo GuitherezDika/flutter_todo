@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _isLoading = true;
     });
-    final url = Uri.parse('http://10.7.129.233:3000/auth/login');
+    final url = Uri.parse('http://192.168.73.5:3000/auth/login');
 
     try {
       final response = await http.post(
@@ -33,7 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
       final data = jsonDecode(response.body);
-      debugPrint('data = ${data}');
       /*
         response.statusCode = 200
 
@@ -46,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // SharedPreferences = penyimpanan lokal storage flutter
         // getInstance = method
         await prefs.setString('accessToken', data['accessToken']);
+        await prefs.setString('refreshToken', data['refreshToken']);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login Success')),
         );

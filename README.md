@@ -16,119 +16,93 @@ lib/
 ├── providers/
 │   └── auth_provider.dart
 
-===
-pubspec.yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  provider: ^6.0.0
-  http: ^1.3.0
-  shared_preferences: ^2.0.0
+===============
 
-===
-flutter pub get
-==
-register_screen.dart
-===
-loogin_screen.dart
+FLOW REFRESH TOKEN
+[Login] 
+   ↓ 
+Simpan accessToken + refreshToken
+   ↓ 
+[Gunakan accessToken untuk semua request]
+   ↓ 
+[accessToken expired?]
+   ↓ 
+Panggil /refresh-token pakai refreshToken
+   ↓ 
+Dapat accessToken baru → simpan → ulangi request sebelumnya
 
-import 'package:flutter/material.dart';
+===============
+ApiService.dart
+
+// services/api_service.dart
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ApiService {
+  static const baseUrl = 'https://your-api-url.com';
 
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
+  Future<http.Response> get(String endpoint) async {
+    final headers = await _getHeaders();
+    final response = await http.get(Uri.parse('$baseUrl$endpoint'), headers: headers);
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false;
+    if (response.statusCode == 401) {
+      // Token expired
+      final refreshed = await _refreshToken();
+      if (refreshed) {
+        final newHeaders = await _getHeaders();
+        return http.get(Uri.parse('$baseUrl$endpoint'), headers: newHeaders);
+      }
+    }
 
-  Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
+    return response;
+  }
 
-    setState(() {
-      _isLoading = true;
-    });
+  Future<Map<String, String>> _getHeaders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken') ?? '';
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+  }
 
-    final url = Uri.parse('https://your-api-url.com/login'); // ganti sesuai URL login kamu
+  Future<bool> _refreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final refreshToken = prefs.getString('refreshToken');
+    if (refreshToken == null) return false;
+
     final response = await http.post(
-      url,
+      Uri.parse('$baseUrl/refresh-token'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'username': _usernameController.text,
-        'password': _passwordController.text,
-      }),
+      body: jsonEncode({'refreshToken': refreshToken}),
     );
-
-    setState(() {
-      _isLoading = false;
-    });
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (data['accessToken'] != null) {
-        final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', data['accessToken']);
-
-        Navigator.pushReplacementNamed(context, '/main'); // ke halaman utama
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Login gagal')),
-        );
+        return true;
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${response.statusCode}')),
-      );
+      await prefs.remove('accessToken');
+      await prefs.remove('refreshToken');
     }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _usernameController,
-                decoration: const InputDecoration(labelText: 'Username'),
-                validator: (value) => value!.isEmpty ? 'Wajib diisi' : null,
-              ),
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                validator: (value) => value!.isEmpty ? 'Wajib diisi' : null,
-              ),
-              const SizedBox(height: 20),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _login,
-                      child: const Text('Login'),
-                    ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/register');
-                },
-                child: const Text('Belum punya akun? Daftar'),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+    return false;
   }
 }
+
+===========================
+contoh misal pemanggilan api/me
+
+final api = ApiService();
+final response = await api.get('/me');
+
+if (response.statusCode == 200) {
+  final data = jsonDecode(response.body);
+  print(data);
+} else {
+  print('Gagal ambil data');
+}
+====================

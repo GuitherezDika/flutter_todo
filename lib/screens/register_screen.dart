@@ -64,28 +64,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() {
       _isLoading = true;
     });
-  
-    final url = Uri.parse('http://192.168.0.114:3000/auth/register');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'username': _usernameController.text,
-        'email': _emailController.text,
-        'password': _passwordController.text,
-        'role': _emailController.text == 'admin@mail.com' ? 'admin' : 'user',
-      }),
-    );
 
-    setState(() {
-      _isLoading = false;
-    });
+    final url = Uri.parse('http://192.168.0.106:3000/auth/register');
 
-    if (response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      if (data['success'] == true) {
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': _usernameController.text,
+          'email': _emailController.text,
+          'password': _passwordController.text,
+          'role': _emailController.text == 'admin@mail.com' ? 'admin' : 'user',
+        }),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registrasi berhasil! Silahkan login.')),
+          SnackBar(content: Text('${data['message']}')),
         );
         Navigator.pushReplacementNamed(context, '/login');
 
@@ -101,12 +101,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         // '/login' = nama route
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Registrasi gagal')),
+          SnackBar(content: Text('Error: ${response.statusCode}')),
         );
       }
-    } else {
+    } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${response.statusCode}')),
+        SnackBar(content: Text('Error: ${error}')),
       );
     }
   } // end function FUTURE

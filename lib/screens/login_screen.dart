@@ -22,33 +22,46 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _isLoading = true;
     });
-    final url = Uri.parse('http://192.168.0.114:3000/auth/register');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'username': _usernameController.text,
-        'password': _passwordController.text,
-      }),
-    );
+    final url = Uri.parse('http://192.168.0.106:3000/auth/login');
 
-    if (response.statusCode == 200) {
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': _usernameController.text,
+          'password': _passwordController.text,
+        }),
+      );
       final data = jsonDecode(response.body);
+      /*
+        response.statusCode = 200
+
+        data.message
+        data.accessToken
+        data.refreshToken
+       */
       if (data['accessToken'] != null) {
         final prefs = await SharedPreferences.getInstance();
-        // SharedPreferences = penyimpanan lokal flutter
+        // SharedPreferences = penyimpanan lokal storage flutter
         // getInstance = method
         await prefs.setString('accessToken', data['accessToken']);
-
-        Navigator.pushReplacementNamed(context, '/main');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login Success')),
+        );
+        // Navigator.pushReplacementNamed(context, '/main');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(data['message'] ?? 'Login gagal')));
       }
-    } else {
+    } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${response.statusCode}')),
+        SnackBar(content: Text('Error: ${err}')),
       );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   } // end Future
 

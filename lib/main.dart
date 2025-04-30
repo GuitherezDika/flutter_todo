@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo_app/app.dart';
 import 'package:todo_app/screens/login_screen.dart';
 import 'package:todo_app/screens/register_screen.dart';
-
+/*
 void main() {
   // fungsi utama flutter
 
   // runApp(const MyApp());
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    initialRoute: '/register',
+    initialRoute: '/login',
     routes: {
       '/register': (context) => const RegisterScreen(),
       '/login': (context) => const LoginScreen()
@@ -20,3 +22,12 @@ void main() {
   ));
 }
 
+ */
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('accessToken');
+
+  runApp(MyApp(isLoggedIn: token != null ));
+}

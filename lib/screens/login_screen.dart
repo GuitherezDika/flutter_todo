@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _isLoading = true;
     });
-    final url = Uri.parse('http://192.168.0.106:3000/auth/login');
+    final url = Uri.parse('http://10.7.129.233:3000/auth/login');
 
     try {
       final response = await http.post(
@@ -34,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
       final data = jsonDecode(response.body);
+      debugPrint('data = ${data}');
       /*
         response.statusCode = 200
 
@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login Success')),
         );
-        // Navigator.pushReplacementNamed(context, '/main');
+        Navigator.pushReplacementNamed(context, '/');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(data['message'] ?? 'Login gagal')));

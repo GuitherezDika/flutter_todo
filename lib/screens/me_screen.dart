@@ -10,7 +10,7 @@ class MeScreen extends StatelessWidget {
   const MeScreen({super.key});
 
   void _logout(BuildContext context) async {
-    final url = Uri.parse('http://192.168.73.5:3000/auth/logout');
+    final url = Uri.parse('http://192.168.72.22:3000/auth/logout');
 
     final prefs = await SharedPreferences.getInstance();
     var refreshToken = prefs.getString('refreshToken');

@@ -65,7 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _isLoading = true;
     });
 
-    final url = Uri.parse('http://192.168.73.5:3000/auth/register');
+    final url = Uri.parse('http://192.168.72.22:3000/auth/register');
 
     try {
       final response = await http.post(

@@ -21,7 +21,6 @@ void main() {
     // --> home, routes, theme
   ));
 }
-
  */
 
 void main() async {

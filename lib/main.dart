@@ -1,32 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_app/app.dart';
-import 'package:todo_app/screens/login_screen.dart';
-import 'package:todo_app/screens/register_screen.dart';
-/*
-void main() {
-  // fungsi utama flutter
-
-  // runApp(const MyApp());
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    initialRoute: '/login',
-    routes: {
-      '/register': (context) => const RegisterScreen(),
-      '/login': (context) => const LoginScreen()
-    }
-
-    // runApp = run applikasi
-    // MaterialApp = widget utama tuk menggunakan Material Design
-    // --> home, routes, theme
-  ));
-}
- */
+import 'package:todo_app/data/presentation/screens/register/register_view_model.dart';
+import 'package:todo_app/data/repositories/auth_repository.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('accessToken');
-
-  runApp(MyApp(isLoggedIn: token != null ));
+    WidgetsFlutterBinding.ensureInitialized();
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+  
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => RegisterViewModel(AuthRepository()),
+      child: MyApp(isLoggedIn: token != null)
+    )
+  );
 }

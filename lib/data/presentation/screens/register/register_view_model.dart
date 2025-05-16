@@ -24,8 +24,8 @@ class RegisterViewModel extends ChangeNotifier{
   bool _isLoading = false;
   String? _errorMessage;
 
-  bool get isLoading => _isLoading; // get = mengambil data dari ChangeNotifier
-  String? get errorMessage => _errorMessage; // get = properti dari ChangeNotifier
+  bool get isLoading => _isLoading; // akan dipakai sebagai data provider pada screen lain (see main.dart)
+  String? get errorMessage => _errorMessage;  // akan dipakai sebagai data provider pada screen lain (see main.dart)
 
   void _setLoading(bool value) {// parameter sifat = boolean
     _isLoading = value;
@@ -54,6 +54,4 @@ class RegisterViewModel extends ChangeNotifier{
       _setLoading(false);
     }
   }
-
-
 }

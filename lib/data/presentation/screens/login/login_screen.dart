@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_app/data/presentation/screens/login/login_view_model.dart';
 import 'package:todo_app/data/presentation/widgets/custom_button.dart';
 import 'package:todo_app/data/presentation/widgets/custom_input_field.dart';
 import 'package:todo_app/data/presentation/widgets/custom_text_button.dart';
@@ -11,20 +15,31 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
-  void dispose() { // buang
-    usernameController.dispose();
-    passwordController.dispose();
+  void dispose() {
+    // clearing funct
+    _usernameController.dispose();
+    _passwordController.dispose();
     super.dispose();
-    // membersihkan sumber daya ketika tidak lagi diperlukan
   }
 
-  void _login() {
-    print("Username: ${usernameController.text}");
-    print("Password: ${passwordController.text}");
+  void _loginUser(BuildContext context) async {
+    final viewModel = context.read<LoginViewModel>();
+    final username = _usernameController.text;
+    final password = _passwordController.text;
+
+    await viewModel.login(username, password);
+    if (viewModel.errorMessage == null) {
+      print('Login Sukses =  ${viewModel.data}');
+      // fungsi navigasi
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal Login')),
+      );
+    }
   }
 
   void _navigateRegister() {
@@ -36,16 +51,26 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            CustomInputField(label: 'Username', controller: usernameController),
-            CustomInputField(label: 'Password', controller: passwordController),
-            CustomButton(text: 'Login', onPressed: _login),
-            CustomTextButton(label: 'Belum punya akun? Daftar', onPressed: _navigateRegister)
-          ],
-        ),
-      ),
+          padding: const EdgeInsets.all(16.0),
+          child: Consumer<LoginViewModel>(
+            builder: (context, viewModel, child) {
+              return Column(children: [
+                if (viewModel.isLoading) const CircularProgressIndicator(),
+                CustomInputField(
+                    label: 'Username', controller: _usernameController),
+                CustomInputField(
+                    label: 'Password',
+                    controller: _passwordController,
+                    obscureText: true),
+                CustomButton(
+                    text: 'Login', onPressed: () => _loginUser(context)),
+                CustomTextButton(
+                    label: 'Belum punya akun? Daftar',
+                    onPressed: _navigateRegister)
+              ]);
+            },
+          )
+          ),
     );
   }
 }

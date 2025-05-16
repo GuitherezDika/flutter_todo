@@ -81,11 +81,3 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
-
-/*
-MVVM
-View = menampilkan data dan kelola interaksi pengguna UI (RegisterScreen)
-ViewModel = jembatani model ke view; handle logika registrasi (RegisterViewModel)
-        handle loading, handle Error Message
-Model = Kelola data dan logika bisnis hit API (repository / AuthRepository )
- */
